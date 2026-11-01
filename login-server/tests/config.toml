@@ -1,0 +1,49 @@
+listen = "0.0.0.0:8081"
+
+[database]
+host = "mysql"
+port = 3306
+user = "root"
+password = "root"
+name = "otserv"
+pool_size = 4
+
+[cache]
+account_refresh_secs = 1
+characters_ttl_secs = 5
+
+[password]
+algorithm = "sha1"
+database_salt = ""
+
+[world]
+id = 0
+name = "TestWorld"
+ip = "127.0.0.1"
+port = 7172
+location = "BRA"
+pvp_type = "pvp"
+
+[security]
+email_verify = false
+ip_ban = true
+max_attempts = 5
+ban_minutes = 30
+trust_proxy = true
+
+[premium]
+lastday_is_premium_end = false
+
+[vocations]
+amount = 4
+names = [
+  "None",
+  "Sorcerer",
+  "Druid",
+  "Paladin",
+  "Knight",
+  "Master Sorcerer",
+  "Elder Druid",
+  "Royal Paladin",
+  "Elite Knight",
+]

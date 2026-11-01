@@ -1,0 +1,55 @@
+# docker compose up --build --abort-on-container-exit --exit-code-from test
+# docker compose --profile bench up --abort-on-container-exit --exit-code-from bench
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: otserv
+    volumes:
+      - ./tests/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 15s
+
+  login-server:
+    build: .
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./tests/config.toml:/etc/login-server.toml:ro
+    command: ["/etc/login-server.toml"]
+    ports:
+      - "8081:8081"
+
+  test:
+    image: alpine:3.20
+    depends_on:
+      - login-server
+    volumes:
+      - ./tests/test.sh:/test.sh:ro
+    entrypoint: ["/bin/sh", "/test.sh"]
+
+  bench:
+    image: ghcr.io/hatoo/oha:latest
+    profiles: ["bench"]
+    depends_on:
+      - login-server
+    entrypoint: ["oha"]
+    command:
+      - "-z"
+      - "10s"
+      - "-c"
+      - "64"
+      - "-m"
+      - "POST"
+      - "-H"
+      - "Content-Type: application/json"
+      - "-d"
+      - "{\"type\":\"login\",\"accountname\":\"nobody\",\"password\":\"x\"}"
+      - "http://login-server:8081/login.php"

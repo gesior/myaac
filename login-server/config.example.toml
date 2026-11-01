@@ -1,0 +1,71 @@
+# JSON login for the game client (`login.php` case "login" only).
+# nginx terminates TLS and proxies /login.php here.
+# cacheinfo, eventschedule and boostedcreature stay on PHP (later info.php).
+#
+#   login-server /etc/login-server.toml
+#   LOGIN_CONFIG=/etc/login-server.toml login-server
+
+listen = "127.0.0.1:8081"
+
+[database]
+host = "127.0.0.1"
+port = 3306
+user = "root"
+password = ""
+name = "otserv"
+pool_size = 8
+accounts_table = "accounts"
+players_table = "players"
+
+[cache]
+# How often the account-refresh thread replaces the whole in-memory account list.
+account_refresh_secs = 1
+# How long one account's character list is reused. Mass logins on that account
+# share a single SQL query (singleflight) until this expires.
+characters_ttl_secs = 5
+
+[password]
+# sha1, md5, sha256, sha512, plain, vahash
+# vahash = base64(hex(sha256(password))), same as MyAAC encrypt().
+algorithm = "sha1"
+# Appended after the password (config.lua / otserv password salt). Empty for TFS sha1.
+# A per-account `salt` column, when present, is prepended automatically.
+database_salt = ""
+
+[world]
+id = 0
+name = "OTServ"
+ip = "127.0.0.1"
+port = 7172
+location = "BRA"
+# pvp, no-pvp, pvp-enforced
+pvp_type = "pvp"
+
+[security]
+email_verify = false
+ip_ban = true
+max_attempts = 5
+ban_minutes = 30
+# Honor X-Real-IP from nginx. Set false if this port is reachable directly.
+trust_proxy = true
+
+[premium]
+# Legacy premdays/lastday day math uses UTC (PHP date() uses the webserver timezone).
+# Set true on Canary when server_config.db_version >= 36 and lastday is a premium-end
+# unix timestamp. Ignored when accounts.premium_ends_at exists (that column wins).
+# If premend exists and this is false, premend is used.
+lastday_is_premium_end = false
+
+[vocations]
+amount = 4
+names = [
+  "None",
+  "Sorcerer",
+  "Druid",
+  "Paladin",
+  "Knight",
+  "Master Sorcerer",
+  "Elder Druid",
+  "Royal Paladin",
+  "Elite Knight",
+]

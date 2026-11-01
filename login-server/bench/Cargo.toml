@@ -1,0 +1,9 @@
+[package]
+name = "login-bench"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "login-bench"
+path = "src/main.rs"
